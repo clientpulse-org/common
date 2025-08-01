@@ -34,7 +34,7 @@ const (
 	userKey ctxKey = "telegram_user"
 
 	// authTimeout defines how long auth_data remains valid.
-	authTimeout = 60 * time.Second
+	authTimeout = 24 * time.Hour
 )
 
 // GetUserFromContext retrieves the TelegramUser from ctx.
