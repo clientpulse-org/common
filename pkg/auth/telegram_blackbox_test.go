@@ -279,6 +279,24 @@ func TestTelegramAuthMiddleware_MissingParameters(t *testing.T) {
 			},
 			expectedStatus: http.StatusUnauthorized,
 		},
+		{
+			name: "auth_date in future",
+			params: url.Values{
+				"hash":      []string{"invalid_hash"},
+				"auth_date": []string{strconv.FormatInt(time.Now().Add(2*time.Minute).Unix(), 10)},
+				"user":      []string{`{"id":123456789,"first_name":"Test"}`},
+			},
+			expectedStatus: http.StatusUnauthorized,
+		},
+		{
+			name: "auth_date too old",
+			params: url.Values{
+				"hash":      []string{"invalid_hash"},
+				"auth_date": []string{strconv.FormatInt(time.Now().Add(-2*time.Minute).Unix(), 10)},
+				"user":      []string{`{"id":123456789,"first_name":"Test"}`},
+			},
+			expectedStatus: http.StatusUnauthorized,
+		},
 	}
 
 	for _, tt := range tests {

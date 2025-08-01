@@ -100,7 +100,10 @@ func validateAuth(values url.Values, botToken string) error {
 		return errors.New("invalid auth_date format")
 	}
 	authTime := time.Unix(seconds, 0)
-	if time.Since(authTime) > authTimeout {
+	timeDiff := time.Since(authTime)
+
+	// Check if auth_date is too far in the past OR in the future
+	if timeDiff > authTimeout || timeDiff < -authTimeout {
 		return errors.New("authorization data expired")
 	}
 
