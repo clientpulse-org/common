@@ -29,7 +29,6 @@ func TestIssueJWTFromTelegramUser(t *testing.T) {
 		t.Fatal("Token should not be empty")
 	}
 
-	// Validate the token
 	claims, err := ValidateJWTToken(token, config)
 	if err != nil {
 		t.Fatalf("Failed to validate JWT: %v", err)
@@ -61,7 +60,6 @@ func TestJWTAuthMiddleware(t *testing.T) {
 		t.Fatalf("Failed to issue JWT: %v", err)
 	}
 
-	// Test successful authentication
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		claims, ok := GetJWTUserFromContext(r.Context())
 		if !ok {
@@ -174,7 +172,6 @@ func TestJWTOptionalMiddleware(t *testing.T) {
 		t.Fatalf("Failed to issue JWT: %v", err)
 	}
 
-	// Test with valid token
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		claims, ok := GetJWTUserFromContext(r.Context())
 		if !ok {
@@ -268,7 +265,6 @@ func TestRefreshJWTToken(t *testing.T) {
 		t.Fatalf("Failed to issue JWT: %v", err)
 	}
 
-	// Wait a bit to ensure different timestamps
 	time.Sleep(100 * time.Millisecond)
 
 	refreshedToken, err := RefreshJWTToken(originalToken, config)
@@ -280,7 +276,6 @@ func TestRefreshJWTToken(t *testing.T) {
 		t.Error("Refreshed token should be different from original token")
 	}
 
-	// Validate the refreshed token
 	claims, err := ValidateJWTToken(refreshedToken, config)
 	if err != nil {
 		t.Fatalf("Failed to validate refreshed JWT: %v", err)
@@ -325,7 +320,6 @@ func TestGetJWTUserFromContext(t *testing.T) {
 		t.Errorf("Expected UserID %d, got %d", claims.UserID, retrievedClaims.UserID)
 	}
 
-	// Test with empty context
 	emptyCtx := context.Background()
 	_, ok = GetJWTUserFromContext(emptyCtx)
 	if ok {

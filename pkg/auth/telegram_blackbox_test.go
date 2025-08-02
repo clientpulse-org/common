@@ -64,7 +64,6 @@ func TestTelegramUser_JSON(t *testing.T) {
 				t.Errorf("Expected %s, got %s", tt.expected, string(data))
 			}
 
-			// Test unmarshaling back
 			var unmarshaled TelegramUser
 			if err := json.Unmarshal(data, &unmarshaled); err != nil {
 				t.Fatalf("Failed to unmarshal user: %v", err)
@@ -98,7 +97,6 @@ func TestGetUserFromContext(t *testing.T) {
 					FirstName: "Test",
 					Username:  "testuser",
 				}
-				// Use the actual context key from the package
 				return context.WithValue(context.Background(), userKey, user)
 			},
 			expectUser:     true,
@@ -123,7 +121,7 @@ func TestGetUserFromContext(t *testing.T) {
 			setupContext: func() context.Context {
 				return context.WithValue(context.Background(), userKey, (*TelegramUser)(nil))
 			},
-			expectUser: true, // Go returns true for nil pointer in type assertion
+			expectUser: true,
 		},
 	}
 
@@ -149,7 +147,6 @@ func TestGetUserFromContext(t *testing.T) {
 }
 
 func TestTelegramAuthMiddleware_ValidRequest(t *testing.T) {
-	// Test with valid auth data
 	user := TelegramUser{
 		ID:        123456789,
 		FirstName: "Test",
@@ -157,10 +154,8 @@ func TestTelegramAuthMiddleware_ValidRequest(t *testing.T) {
 		IsBot:     false,
 	}
 
-	// Create valid auth parameters
 	params := createValidAuthParams(t, user, "test_bot_token")
 
-	// Create test handler
 	var capturedUser *TelegramUser
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if user, ok := GetUserFromContext(r.Context()); ok {
@@ -169,18 +164,14 @@ func TestTelegramAuthMiddleware_ValidRequest(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	// Create middleware
 	middleware := TelegramAuthMiddleware("test_bot_token")
 	handler := middleware(testHandler)
 
-	// Create request
-	req := httptest.NewRequest("GET", "/test?"+params.Encode(), nil)
+	req := httptest.NewRequest("GET", "/test", nil)
+	req.Header.Set("Authorization", "tma "+params.Encode())
 	w := httptest.NewRecorder()
 
-	// Execute request
 	handler.ServeHTTP(w, req)
-
-	// Verify response
 	if w.Code != http.StatusOK {
 		t.Errorf("Expected status %d, got %d", http.StatusOK, w.Code)
 	}
@@ -199,7 +190,6 @@ func TestTelegramAuthMiddleware_ValidRequest(t *testing.T) {
 }
 
 func TestTelegramAuthMiddleware_InvalidSignature(t *testing.T) {
-	// Test with invalid signature
 	params := url.Values{}
 	params.Set("hash", "invalid_hash")
 	params.Set("auth_date", strconv.FormatInt(time.Now().Unix(), 10))
@@ -212,7 +202,8 @@ func TestTelegramAuthMiddleware_InvalidSignature(t *testing.T) {
 	middleware := TelegramAuthMiddleware("test_bot_token")
 	handler := middleware(testHandler)
 
-	req := httptest.NewRequest("GET", "/test?"+params.Encode(), nil)
+	req := httptest.NewRequest("GET", "/test", nil)
+	req.Header.Set("Authorization", "tma "+params.Encode())
 	w := httptest.NewRecorder()
 
 	handler.ServeHTTP(w, req)
@@ -223,7 +214,6 @@ func TestTelegramAuthMiddleware_InvalidSignature(t *testing.T) {
 }
 
 func TestTelegramAuthMiddleware_BotUser(t *testing.T) {
-	// Test with bot user (should be rejected)
 	botUser := TelegramUser{
 		ID:        987654321,
 		FirstName: "TestBot",
@@ -239,7 +229,8 @@ func TestTelegramAuthMiddleware_BotUser(t *testing.T) {
 	middleware := TelegramAuthMiddleware("test_bot_token")
 	handler := middleware(testHandler)
 
-	req := httptest.NewRequest("GET", "/test?"+params.Encode(), nil)
+	req := httptest.NewRequest("GET", "/test", nil)
+	req.Header.Set("Authorization", "tma "+params.Encode())
 	w := httptest.NewRecorder()
 
 	handler.ServeHTTP(w, req)
@@ -252,48 +243,84 @@ func TestTelegramAuthMiddleware_BotUser(t *testing.T) {
 func TestTelegramAuthMiddleware_MissingParameters(t *testing.T) {
 	tests := []struct {
 		name           string
-		params         url.Values
+		setupAuth      func() string
 		expectedStatus int
 	}{
 		{
+			name: "missing authorization header",
+			setupAuth: func() string {
+				return ""
+			},
+			expectedStatus: http.StatusUnauthorized,
+		},
+		{
+			name: "invalid authorization format",
+			setupAuth: func() string {
+				return "invalid"
+			},
+			expectedStatus: http.StatusUnauthorized,
+		},
+		{
+			name: "wrong auth type",
+			setupAuth: func() string {
+				return "Bearer token123"
+			},
+			expectedStatus: http.StatusUnauthorized,
+		},
+		{
 			name: "missing hash",
-			params: url.Values{
-				"auth_date": []string{strconv.FormatInt(time.Now().Unix(), 10)},
-				"user":      []string{`{"id":123456789,"first_name":"Test"}`},
+			setupAuth: func() string {
+				params := url.Values{
+					"auth_date": []string{strconv.FormatInt(time.Now().Unix(), 10)},
+					"user":      []string{`{"id":123456789,"first_name":"Test"}`},
+				}
+				return "tma " + params.Encode()
 			},
 			expectedStatus: http.StatusUnauthorized,
 		},
 		{
 			name: "missing auth_date",
-			params: url.Values{
-				"hash": []string{"abc123"},
-				"user": []string{`{"id":123456789,"first_name":"Test"}`},
+			setupAuth: func() string {
+				params := url.Values{
+					"hash": []string{"abc123"},
+					"user": []string{`{"id":123456789,"first_name":"Test"}`},
+				}
+				return "tma " + params.Encode()
 			},
 			expectedStatus: http.StatusUnauthorized,
 		},
 		{
 			name: "missing user",
-			params: url.Values{
-				"hash":      []string{"abc123"},
-				"auth_date": []string{strconv.FormatInt(time.Now().Unix(), 10)},
+			setupAuth: func() string {
+				params := url.Values{
+					"hash":      []string{"abc123"},
+					"auth_date": []string{strconv.FormatInt(time.Now().Unix(), 10)},
+				}
+				return "tma " + params.Encode()
 			},
 			expectedStatus: http.StatusUnauthorized,
 		},
 		{
 			name: "auth_date in future",
-			params: url.Values{
-				"hash":      []string{"invalid_hash"},
-				"auth_date": []string{strconv.FormatInt(time.Now().Add(2*time.Minute).Unix(), 10)},
-				"user":      []string{`{"id":123456789,"first_name":"Test"}`},
+			setupAuth: func() string {
+				params := url.Values{
+					"hash":      []string{"invalid_hash"},
+					"auth_date": []string{strconv.FormatInt(time.Now().Add(2*time.Minute).Unix(), 10)},
+					"user":      []string{`{"id":123456789,"first_name":"Test"}`},
+				}
+				return "tma " + params.Encode()
 			},
 			expectedStatus: http.StatusUnauthorized,
 		},
 		{
 			name: "auth_date too old",
-			params: url.Values{
-				"hash":      []string{"invalid_hash"},
-				"auth_date": []string{strconv.FormatInt(time.Now().Add(-2*time.Minute).Unix(), 10)},
-				"user":      []string{`{"id":123456789,"first_name":"Test"}`},
+			setupAuth: func() string {
+				params := url.Values{
+					"hash":      []string{"invalid_hash"},
+					"auth_date": []string{strconv.FormatInt(time.Now().Add(-2*time.Minute).Unix(), 10)},
+					"user":      []string{`{"id":123456789,"first_name":"Test"}`},
+				}
+				return "tma " + params.Encode()
 			},
 			expectedStatus: http.StatusUnauthorized,
 		},
@@ -308,7 +335,11 @@ func TestTelegramAuthMiddleware_MissingParameters(t *testing.T) {
 			middleware := TelegramAuthMiddleware("test_bot_token")
 			handler := middleware(testHandler)
 
-			req := httptest.NewRequest("GET", "/test?"+tt.params.Encode(), nil)
+			req := httptest.NewRequest("GET", "/test", nil)
+			authHeader := tt.setupAuth()
+			if authHeader != "" {
+				req.Header.Set("Authorization", authHeader)
+			}
 			w := httptest.NewRecorder()
 
 			handler.ServeHTTP(w, req)
@@ -320,7 +351,6 @@ func TestTelegramAuthMiddleware_MissingParameters(t *testing.T) {
 	}
 }
 
-// Helper function to create valid auth parameters for testing
 func createValidAuthParams(t *testing.T, user TelegramUser, botToken string) url.Values {
 	userJSON, err := json.Marshal(user)
 	if err != nil {
@@ -330,25 +360,25 @@ func createValidAuthParams(t *testing.T, user TelegramUser, botToken string) url
 	params := url.Values{}
 	params.Set("auth_date", strconv.FormatInt(time.Now().Unix(), 10))
 	params.Set("user", string(userJSON))
+	params.Set("query_id", "test_query_id")
 
-	// Generate valid hash using the same logic as the actual implementation
-	hash := generateValidHash(params)
+	dataCheckString := buildDataCheckString(params)
+	hash := generateValidHashWithLib(dataCheckString, botToken)
 	params.Set("hash", hash)
 
 	return params
 }
 
-// Helper function to generate valid hash for testing
-func generateValidHash(values url.Values) string {
-	// Use the actual HMAC-SHA256 logic from the package
-	dataCheck := buildDataCheckString(values)
-	secret := sha256.Sum256([]byte("test_bot_token"))
-	mac := hmac.New(sha256.New, secret[:])
-	mac.Write([]byte(dataCheck))
+func generateValidHashWithLib(dataCheckString, botToken string) string {
+	secretKey := hmac.New(sha256.New, []byte("WebAppData"))
+	secretKey.Write([]byte(botToken))
+	secret := secretKey.Sum(nil)
+
+	mac := hmac.New(sha256.New, secret)
+	mac.Write([]byte(dataCheckString))
 	return hex.EncodeToString(mac.Sum(nil))
 }
 
-// Helper function to build data check string
 func buildDataCheckString(values url.Values) string {
 	var parts []string
 	for key, vals := range values {
@@ -359,7 +389,6 @@ func buildDataCheckString(values url.Values) string {
 			parts = append(parts, key+"="+vals[0])
 		}
 	}
-	// Sort parts for consistent ordering
 	sort.Strings(parts)
 	return strings.Join(parts, "\n")
 }
