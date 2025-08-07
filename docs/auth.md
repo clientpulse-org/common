@@ -29,7 +29,7 @@ package main
 import (
     "fmt"
     "time"
-    "github.com/clientpulse-org/common/pkg/auth"
+    "github.com/quiby-ai/common/pkg/auth"
 )
 
 func main() {
@@ -65,7 +65,7 @@ package main
 import (
     "encoding/json"
     "net/http"
-    "github.com/clientpulse-org/common/pkg/auth"
+    "github.com/quiby-ai/common/pkg/auth"
 )
 
 func main() {
@@ -105,7 +105,7 @@ package main
 import (
     "encoding/json"
     "net/http"
-    "github.com/clientpulse-org/common/pkg/auth"
+    "github.com/quiby-ai/common/pkg/auth"
 )
 
 func main() {

@@ -1,4 +1,4 @@
-module github.com/clientpulse-org/common
+module github.com/quiby-ai/common
 
 go 1.24.1
 
