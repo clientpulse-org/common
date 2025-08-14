@@ -69,15 +69,17 @@ const (
 	SagaStepPrepare SagaStep = "prepare"
 )
 
+type StateChangedContext struct {
+	Message string `json:"message"`
+}
+
 // StateChanged represents the payload for saga.orchestrator.state.changed events.
 type StateChanged struct {
-	Status  SagaStatus `json:"status"` // Current saga status
-	Step    SagaStep   `json:"step"`   // Current step
-	Context struct {
-		Message string `json:"message"`
-	} `json:"context"`
-	Error *struct {
+	Status  SagaStatus          `json:"status"`
+	Step    SagaStep            `json:"step"`
+	Context StateChangedContext `json:"context"`
+	Error   *struct {
 		Code    FailedCode `json:"code"`
 		Message string     `json:"message"`
-	} `json:"error,omitempty"` // Only present when status is "failed"
+	} `json:"error,omitempty"`
 }
