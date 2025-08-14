@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Event Envelope Schema v1",
+  "description": "Standard message envelope for all Kafka events",
+  "type": "object",
+  "required": ["saga_id", "type", "occurred_at", "payload", "meta"],
+  "properties": {
+    "message_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Optional message ID for idempotency"
+    },
+    "trace_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Optional trace ID for distributed tracing"
+    },
+    "saga_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Required saga ID for correlation"
+    },
+    "type": {
+      "type": "string",
+      "description": "Event type identifier"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the event occurred (RFC3339 UTC)"
+    },
+    "payload": {
+      "description": "Event-specific payload data"
+    },
+    "meta": {
+      "$ref": "#/definitions/meta"
+    }
+  },
+  "definitions": {
+    "meta": {
+      "type": "object",
+      "required": ["app_id", "tenant_id", "initiator", "retries", "schema_version"],
+      "properties": {
+        "app_id": {
+          "type": "string",
+          "description": "Source application identifier"
+        },
+        "tenant_id": {
+          "type": "string",
+          "description": "Tenant isolation identifier"
+        },
+        "initiator": {
+          "type": "string",
+          "enum": ["user", "system"],
+          "description": "Who initiated the event"
+        },
+        "retries": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of processing attempts"
+        },
+        "schema_version": {
+          "type": "string",
+          "enum": ["v1"],
+          "description": "Payload schema version"
+        }
+      }
+    }
+  }
+}
