@@ -39,7 +39,7 @@ func (s *PrepareRequest) Validate() error {
 
 // PrepareCompleted represents the payload for pipeline.prepare_reviews.completed events.
 type PrepareCompleted struct {
-	ExtractCompleted
+	PrepareRequest
 	CleanCount int `json:"clean_count" validate:"required,min=0"`
 }
 
