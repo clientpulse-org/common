@@ -28,8 +28,14 @@ func (s *ExtractCompleted) Validate() error {
 }
 
 // PrepareRequest represents the payload for pipeline.prepare_reviews.request events.
-// It's an alias to ExtractRequest as they share the same structure.
-type PrepareRequest = ExtractRequest
+type PrepareRequest struct {
+	ExtractRequest
+}
+
+func (s *PrepareRequest) Validate() error {
+	validate := validator.New()
+	return validate.Struct(s)
+}
 
 // PrepareCompleted represents the payload for pipeline.prepare_reviews.completed events.
 type PrepareCompleted struct {
