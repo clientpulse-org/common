@@ -16,10 +16,9 @@ func NewEnvelope[T any](sagaID, eventType string, payload T, meta Meta) Envelope
 }
 
 // NewMeta creates a new Meta struct with the required fields.
-func NewMeta(appID, tenantID string, initiator Initiator) Meta {
+func NewMeta(appID string, initiator Initiator) Meta {
 	return Meta{
 		AppID:         appID,
-		TenantID:      tenantID,
 		Initiator:     initiator,
 		Retries:       0,
 		SchemaVersion: SchemaVersionV1,

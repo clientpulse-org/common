@@ -54,14 +54,6 @@ func ValidateEnvelope[T any](envelope Envelope[T]) ValidationResult {
 		})
 	}
 
-	if envelope.Meta.TenantID == "" {
-		result.Valid = false
-		result.Errors = append(result.Errors, ValidationError{
-			Field:   "meta.tenant_id",
-			Message: "meta.tenant_id is required",
-		})
-	}
-
 	if envelope.Meta.Initiator == "" {
 		result.Valid = false
 		result.Errors = append(result.Errors, ValidationError{

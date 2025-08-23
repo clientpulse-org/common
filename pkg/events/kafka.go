@@ -13,7 +13,6 @@ func (e Envelope[T]) KafkaHeaders() []KafkaHeader {
 	headers := []KafkaHeader{
 		{Key: "saga_id", Value: []byte(e.SagaID)},
 		{Key: "event_type", Value: []byte(e.Type)},
-		{Key: "tenant_id", Value: []byte(e.Meta.TenantID)},
 		{Key: "app_id", Value: []byte(e.Meta.AppID)},
 		{Key: "initiator", Value: []byte(string(e.Meta.Initiator))},
 		{Key: "schema_version", Value: []byte(e.Meta.SchemaVersion)},

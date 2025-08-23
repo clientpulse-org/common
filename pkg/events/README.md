@@ -16,7 +16,7 @@ The `events` package provides shared Kafka event contracts and helpers used by a
 import "github.com/quiby-ai/common/pkg/events"
 
 // Create metadata
-meta := events.NewMeta("review-service", "tenant-123", events.InitiatorUser)
+meta := events.NewMeta("review-service", events.InitiatorUser)
 
 // Create payload
 payload := events.ExtractRequest{

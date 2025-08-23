@@ -39,15 +39,11 @@
   "definitions": {
     "meta": {
       "type": "object",
-      "required": ["app_id", "tenant_id", "initiator", "retries", "schema_version"],
+      "required": ["app_id", "initiator", "retries", "schema_version"],
       "properties": {
         "app_id": {
           "type": "string",
           "description": "Source application identifier"
-        },
-        "tenant_id": {
-          "type": "string",
-          "description": "Tenant isolation identifier"
         },
         "initiator": {
           "type": "string",

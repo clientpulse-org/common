@@ -17,7 +17,6 @@ const (
 // Meta holds auxiliary metadata not part of the core payload.
 type Meta struct {
 	AppID         string    `json:"app_id"`
-	TenantID      string    `json:"tenant_id"`
 	Initiator     Initiator `json:"initiator"`
 	Retries       int       `json:"retries"`
 	SchemaVersion string    `json:"schema_version"`
