@@ -2,13 +2,11 @@ package events
 
 import "fmt"
 
-// KafkaHeader represents a Kafka message header.
 type KafkaHeader struct {
 	Key   string
 	Value []byte
 }
 
-// KafkaHeaders returns Kafka headers for envelope fields.
 func (e Envelope[T]) KafkaHeaders() []KafkaHeader {
 	headers := []KafkaHeader{
 		{Key: "saga_id", Value: []byte(e.SagaID)},
