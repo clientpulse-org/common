@@ -48,6 +48,26 @@ func (s *PrepareCompleted) Validate() error {
 	return validate.Struct(s)
 }
 
+// VectorizeRequest represents the payload for pipeline.vectorize_reviews.request events.
+type VectorizeRequest struct {
+	ExtractRequest
+}
+
+func (s *VectorizeRequest) Validate() error {
+	validate := validator.New()
+	return validate.Struct(s)
+}
+
+// VectorizeCompleted represents the payload for pipeline.vectorize_reviews.completed events.
+type VectorizeCompleted struct {
+	VectorizeRequest
+}
+
+func (s *VectorizeCompleted) Validate() error {
+	validate := validator.New()
+	return validate.Struct(s)
+}
+
 // FailedCode represents the error codes for pipeline.failed events.
 type FailedCode string
 

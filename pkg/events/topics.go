@@ -5,11 +5,13 @@ package events
 // proper event routing and processing.
 const (
 	// Pipeline events
-	PipelineExtractRequest   = "pipeline.extract_reviews.request"
-	PipelineExtractCompleted = "pipeline.extract_reviews.completed"
-	PipelinePrepareRequest   = "pipeline.prepare_reviews.request"
-	PipelinePrepareCompleted = "pipeline.prepare_reviews.completed"
-	PipelineFailed           = "pipeline.failed"
+	PipelineExtractRequest     = "pipeline.extract_reviews.request"
+	PipelineExtractCompleted   = "pipeline.extract_reviews.completed"
+	PipelinePrepareRequest     = "pipeline.prepare_reviews.request"
+	PipelinePrepareCompleted   = "pipeline.prepare_reviews.completed"
+	PipelineVectorizeRequest   = "pipeline.vectorize_reviews.request"
+	PipelineVectorizeCompleted = "pipeline.vectorize_reviews.completed"
+	PipelineFailed             = "pipeline.failed"
 
 	// Saga orchestration events
 	SagaStateChanged = "saga.orchestrator.state.changed"
