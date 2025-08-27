@@ -5,6 +5,7 @@ go 1.24.1
 require (
 	github.com/go-playground/validator/v10 v10.27.0
 	github.com/golang-jwt/jwt/v5 v5.2.0
+	github.com/google/uuid v1.6.0
 	github.com/segmentio/kafka-go v0.4.49
 	github.com/telegram-mini-apps/init-data-golang v1.5.0
 )
