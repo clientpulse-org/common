@@ -84,7 +84,7 @@ const (
 
 // Failed represents the payload for pipeline.failed events.
 type Failed struct {
-	Step        SagaStep   `json:"step" validate:"required,oneof=extract prepare"`
+	Step        SagaStep   `json:"step" validate:"required,oneof=extract prepare vectorize"`
 	Code        FailedCode `json:"code" validate:"required,oneof=SOURCE_UNAVAILABLE RATE_LIMIT AUTH_FAILED TEMP_STORAGE_UNAVAILABLE WRITE_FAILED VALIDATION_ERROR SCHEMA_MISMATCH UNKNOWN"`
 	Recoverable bool       `json:"recoverable" validate:"required"`
 	// Details     string     `json:"details" validate:"omitempty"`
@@ -109,8 +109,9 @@ const (
 type SagaStep string
 
 const (
-	SagaStepExtract SagaStep = "extract"
-	SagaStepPrepare SagaStep = "prepare"
+	SagaStepExtract   SagaStep = "extract"
+	SagaStepPrepare   SagaStep = "prepare"
+	SagaStepVectorize SagaStep = "vectorize"
 )
 
 type StateChangedContext struct {
@@ -120,7 +121,7 @@ type StateChangedContext struct {
 // StateChanged represents the payload for saga.orchestrator.state.changed events.
 type StateChanged struct {
 	Status  SagaStatus          `json:"status" validate:"required,oneof=running failed completed"`
-	Step    SagaStep            `json:"step" validate:"required,oneof=extract prepare"`
+	Step    SagaStep            `json:"step" validate:"required,oneof=extract prepare vectorize"`
 	Context StateChangedContext `json:"context" validate:"required"`
 	Error   *struct {
 		Code    FailedCode `json:"code" validate:"required,oneof=SOURCE_UNAVAILABLE RATE_LIMIT AUTH_FAILED TEMP_STORAGE_UNAVAILABLE WRITE_FAILED VALIDATION_ERROR SCHEMA_MISMATCH UNKNOWN"`
