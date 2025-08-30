@@ -63,6 +63,26 @@ func BuildEnvelope[T any](event T, eventType string, sagaID string) Envelope[any
 		OccurredAt: time.Now().UTC(),
 		Payload:    event,
 		Meta: Meta{
+			AppID:         "review-ingestor", // Set appropriate app ID
+			Initiator:     InitiatorSystem,   // Default to system initiator
+			Retries:       0,
+			SchemaVersion: SchemaVersionV1,
+		},
+	}
+}
+
+// BuildEnvelopeWithMeta creates an envelope with custom meta information
+func BuildEnvelopeWithMeta[T any](event T, eventType string, sagaID string, appID string, initiator Initiator) Envelope[any] {
+	return Envelope[any]{
+		MessageID:  uuid.NewString(),
+		SagaID:     sagaID,
+		Type:       eventType,
+		OccurredAt: time.Now().UTC(),
+		Payload:    event,
+		Meta: Meta{
+			AppID:         appID,
+			Initiator:     initiator,
+			Retries:       0,
 			SchemaVersion: SchemaVersionV1,
 		},
 	}
